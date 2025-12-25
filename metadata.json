@@ -1,0 +1,5 @@
+{
+  "name": "Spreadsheet Review Showcase",
+  "description": "A high-performance React application that fetches and visualizes Google Sheets data as beautiful interactive cards with AI-powered insights and dynamic star ratings.",
+  "requestFramePermissions": []
+}
