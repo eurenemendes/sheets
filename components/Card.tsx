@@ -14,13 +14,13 @@ const Card: React.FC<CardProps> = ({ item }) => {
         <img 
           src={item.logo} 
           alt={item.name}
-          className="max-w-full max-h-full object-contain transition-transform duration-500 hover:scale-110"
+          className="max-w-full max-h-full object-contain transition-transform duration-500 transform hover:scale-110"
           onError={(e) => {
             (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(item.name)}&background=random&size=200`;
           }}
         />
         <div className="absolute top-3 right-3">
-            <span className="px-3 py-1 bg-white/80 backdrop-blur-md border border-gray-200 rounded-full text-[10px] font-bold uppercase tracking-wider text-gray-500 shadow-sm">
+            <span className="px-3 py-1 bg-white bg-opacity-80 border border-gray-200 rounded-full text-xs font-bold uppercase tracking-wider text-gray-500 shadow-sm">
                 ID: {item.id.replace('item-', '')}
             </span>
         </div>

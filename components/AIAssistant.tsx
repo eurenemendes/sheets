@@ -20,13 +20,13 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ data }) => {
       
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
-        contents: `Analise estes itens de uma planilha e forneça um resumo rápido de 3 pontos sobre as melhores opções ou tendências: ${itemsSummary}`,
+        contents: `Analise estes itens e forneça 3 pontos rápidos em português sobre as melhores opções: ${itemsSummary}`,
         config: {
-            systemInstruction: "Você é um assistente analista de dados. Seja conciso e use português do Brasil."
+            systemInstruction: "Você é um assistente analista de dados conciso."
         }
       });
 
-      setInsight(response.text || "Não foi possível gerar insights agora.");
+      setInsight(response.text || "Não foi possível gerar insights.");
     } catch (err) {
       console.error(err);
       setInsight("Erro ao contatar a IA.");
@@ -44,19 +44,19 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ data }) => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
           </div>
-          <h2 className="text-lg font-bold text-indigo-900">Assistente IA Gemini</h2>
+          <h2 className="text-lg font-bold text-indigo-900">IA Gemini Insights</h2>
         </div>
         <button 
           onClick={generateInsight}
           disabled={loading || data.length === 0}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
+          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-all disabled:opacity-50"
         >
           {loading ? 'Analisando...' : 'Gerar Insights'}
         </button>
       </div>
       
       {insight && (
-        <div className="bg-white/50 p-4 rounded-xl border border-indigo-200 animate-fade-in">
+        <div className="bg-white bg-opacity-60 p-4 rounded-xl border border-indigo-200 animate-fade-in">
           <p className="text-indigo-800 leading-relaxed whitespace-pre-wrap">{insight}</p>
         </div>
       )}
