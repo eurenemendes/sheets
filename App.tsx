@@ -1,8 +1,39 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { fetchSheetData } from './services/sheetService';
 import { SheetItem } from './types';
 import Card from './components/Card';
 import AIAssistant from './components/AIAssistant';
+
+type TabType = {
+  id: string;
+  label: string;
+  gid: string;
+  icon: React.ReactNode;
+};
+
+const TABS: TabType[] = [
+  { 
+    id: 'empresas', 
+    label: 'Empresas', 
+    gid: '2050396937',
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+      </svg>
+    )
+  },
+  { 
+    id: 'supermercados', 
+    label: 'Supermercados', 
+    gid: '1809531399',
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+      </svg>
+    )
+  }
+];
 
 const App: React.FC = () => {
   const [items, setItems] = useState<SheetItem[]>([]);
@@ -10,6 +41,7 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'rating'>('rating');
+  const [activeTab, setActiveTab] = useState(TABS[0]);
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const saved = localStorage.getItem('darkMode');
     return saved ? JSON.parse(saved) : false;
@@ -17,21 +49,20 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const loadData = async () => {
+      setLoading(true);
       try {
-        const data = await fetchSheetData();
+        const data = await fetchSheetData(activeTab.gid);
         setItems(data);
         setError(null);
       } catch (err) {
-        setError('Falha ao carregar dados da planilha. Verifique se o link é público.');
+        setError(`Falha ao carregar dados da aba ${activeTab.label}. Verifique a conexão.`);
       } finally {
         setLoading(false);
       }
     };
 
     loadData();
-    const interval = setInterval(loadData, 60000);
-    return () => clearInterval(interval);
-  }, []);
+  }, [activeTab]);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -54,17 +85,6 @@ const App: React.FC = () => {
       });
   }, [items, searchTerm, sortBy]);
 
-  if (loading && items.length === 0) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 transition-colors duration-300">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-500 font-medium">Sincronizando com a Planilha...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen pb-20 transition-colors duration-300">
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50 bg-opacity-90 backdrop-blur-sm transition-colors duration-300">
@@ -79,20 +99,15 @@ const App: React.FC = () => {
                 </div>
                 <div>
                   <h1 className="text-2xl font-black text-gray-900 tracking-tight">Showcase<span className="text-indigo-600">Pro</span></h1>
-                  <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Live Sheet Data</p>
+                  <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Belo Jardim • PE</p>
                 </div>
               </div>
               
-              {/* Toggle Noturno Mobile */}
               <button 
                 onClick={() => setIsDarkMode(!isDarkMode)}
                 className="p-2 rounded-lg bg-gray-100 text-gray-500 md:hidden hover:bg-gray-200 transition-colors"
               >
-                {isDarkMode ? (
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/></svg>
-                ) : (
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
-                )}
+                {isDarkMode ? '☀️' : '🌙'}
               </button>
             </div>
 
@@ -100,7 +115,7 @@ const App: React.FC = () => {
               <div className="relative w-full sm:w-64">
                 <input 
                   type="text" 
-                  placeholder="Buscar itens..."
+                  placeholder="Buscar..."
                   className="w-full pl-10 pr-4 py-2 bg-gray-100 border-transparent rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 transition-all outline-none text-gray-700"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -115,27 +130,36 @@ const App: React.FC = () => {
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
               >
-                <option value="rating">Melhor Avaliados</option>
-                <option value="name">Ordem Alfabética</option>
+                <option value="rating">Destaques</option>
+                <option value="name">A - Z</option>
               </select>
 
-              {/* Toggle Noturno Desktop */}
               <button 
                 onClick={() => setIsDarkMode(!isDarkMode)}
                 className="hidden md:flex p-2 rounded-xl bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-indigo-600 transition-all duration-200"
-                title={isDarkMode ? "Ativar Modo Claro" : "Ativar Modo Escuro"}
               >
-                {isDarkMode ? (
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 9H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                  </svg>
-                ) : (
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                  </svg>
-                )}
+                {isDarkMode ? '☀️' : '🌙'}
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* Barra de Abas */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-2">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-2">
+            {TABS.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab)}
+                className={`flex items-center gap-2 px-5 py-2 rounded-full font-bold text-sm transition-all whitespace-nowrap shadow-sm
+                  ${activeTab.id === tab.id 
+                    ? 'bg-indigo-600 text-white' 
+                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+              >
+                {tab.icon}
+                {tab.label}
+              </button>
+            ))}
           </div>
         </div>
       </header>
@@ -143,27 +167,27 @@ const App: React.FC = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
         {error && (
           <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-xl mb-8">
-            <div className="flex items-center gap-3">
-              <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-              <p className="text-red-700 font-medium">{error}</p>
-            </div>
+            <p className="text-red-700 font-medium">{error}</p>
           </div>
         )}
 
         {items.length > 0 && <AIAssistant data={items} />}
 
-        {filteredAndSortedItems.length > 0 ? (
-          <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-8">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-4">
+             <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+             <p className="text-gray-400 animate-pulse">Carregando {activeTab.label}...</p>
+          </div>
+        ) : filteredAndSortedItems.length > 0 ? (
+          <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-8 animate-fade-in">
             {filteredAndSortedItems.map((item) => (
               <Card key={item.id} item={item} />
             ))}
           </div>
         ) : (
           <div className="text-center py-20">
-            <h3 className="text-xl font-bold text-gray-800">Nenhum resultado</h3>
-            <p className="text-gray-500">Tente outros termos de busca.</p>
+            <h3 className="text-xl font-bold text-gray-800">Nenhum resultado em {activeTab.label}</h3>
+            <p className="text-gray-500">Tente buscar por outro termo.</p>
           </div>
         )}
       </main>

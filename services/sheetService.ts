@@ -2,15 +2,13 @@
 import { SheetItem } from '../types';
 
 const SHEET_ID = '1vQWOP_30V_Uxa9jT6ss7xdmxHeGgaAxvcT1B_7wbPtL5ZmPg2z9lQIo04VOkZELDePoVg2_r5Ue_sn_';
-const GID = '2050396937';
-const CSV_URL = `https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=${GID}&single=true&output=csv`;
+const CSV_BASE_URL = `https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?single=true&output=csv`;
 
-export async function fetchSheetData(): Promise<SheetItem[]> {
+export async function fetchSheetData(gid: string = '2050396937'): Promise<SheetItem[]> {
   try {
-    const response = await fetch(CSV_URL);
+    const response = await fetch(`${CSV_BASE_URL}&gid=${gid}`);
     const text = await response.text();
     
-    // Simple CSV parser (assuming comma-separated and potentially quoted strings)
     const lines = text.split(/\r?\n/);
     if (lines.length < 2) return [];
 
@@ -19,11 +17,11 @@ export async function fetchSheetData(): Promise<SheetItem[]> {
 
     // Map columns dynamically based on common names
     const colMap = {
-      name: headers.findIndex(h => /nome|título|title|item/i.test(h)),
+      name: headers.findIndex(h => /nome|título|title|item|empresa/i.test(h)),
       logo: headers.findIndex(h => /logo|imagem|image|img/i.test(h)),
       rating: headers.findIndex(h => /estrela|rating|nota|pontua/i.test(h)),
-      description: headers.findIndex(h => /descri|info/i.test(h)),
-      link: headers.findIndex(h => /link|url|site|acess/i.test(h)),
+      description: headers.findIndex(h => /descri|info|detalhe/i.test(h)),
+      link: headers.findIndex(h => /link|url|site|acess|whatsapp|contato/i.test(h)),
     };
 
     for (let i = 1; i < lines.length; i++) {
@@ -38,9 +36,9 @@ export async function fetchSheetData(): Promise<SheetItem[]> {
       const ratingVal = parseFloat(row[colMap.rating]) || 0;
 
       items.push({
-        id: `item-${i}`,
+        id: `item-${gid}-${i}`,
         name: row[colMap.name] || 'Sem Nome',
-        logo: row[colMap.logo] || 'https://picsum.photos/200',
+        logo: row[colMap.logo] || `https://ui-avatars.com/api/?name=${encodeURIComponent(row[colMap.name] || 'Item')}&background=random`,
         rating: ratingVal,
         description: row[colMap.description] || '',
         link: row[colMap.link] || '#',
